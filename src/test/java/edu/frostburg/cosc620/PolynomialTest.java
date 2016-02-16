@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+package edu.frostburg.cosc620;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +11,7 @@ import static org.junit.Assert.*;
  * @author Kevin Raoofi
  */
 public class PolynomialTest {
-    
+
     public PolynomialTest() {
     }
 
@@ -69,7 +65,7 @@ public class PolynomialTest {
         System.out.println("firstNonZeroNormal");
         int[] arr = new int[]{0, 0, 0, 0, 10, 2, 3, 4};
         int expResult = 4;
-        int result = PolynomialOrig.firstNonZero(arr);
+        int result = Polynomial.firstNonZero(arr);
         assertEquals(expResult, result);
     }
 
@@ -81,7 +77,7 @@ public class PolynomialTest {
         System.out.println("firstNonZeroAllZeros");
         int[] arr = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         int expResult = arr.length;
-        int result = PolynomialOrig.firstNonZero(arr);
+        int result = Polynomial.firstNonZero(arr);
         assertEquals(expResult, result);
     }
 
@@ -93,7 +89,7 @@ public class PolynomialTest {
         System.out.println("firstNonZeroAllNonZeros");
         int[] arr = new int[]{1, 2, 3, 4, 5, 6, 7};
         int expResult = 0;
-        int result = PolynomialOrig.firstNonZero(arr);
+        int result = Polynomial.firstNonZero(arr);
         assertEquals(expResult, result);
     }
 
@@ -197,5 +193,5 @@ public class PolynomialTest {
         String result = instance.polynomialForm();
         assertEquals(expResult, result);
     }
-    
+
 }

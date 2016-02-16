@@ -1,3 +1,4 @@
+package edu.frostburg.cosc620;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
  *
  * @author Seyed Kevin Raoofi
  */
-public class Polynomial {
+class Polynomial {
 
     /**
      * Reads the lines in the input file and generates an ordered list of the
@@ -78,7 +79,7 @@ public class Polynomial {
      * Creates a Polynomial instance with the given coefficients. The degree is
      * implied by the position of the coefficient in reverse order. e.g.,
      *
-     * @{code [1, 2, 3]} is considered {@code x^2 + 2x + 3}
+     * {@code [1, 2, 3]} is considered {@code x^2 + 2x + 3}
      *
      * @param coefficients array of coefficients
      */
