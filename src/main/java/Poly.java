@@ -15,7 +15,14 @@ import java.util.stream.IntStream;
  *
  * @author Seyed Kevin Raoofi
  */
-public class Poly {
+public final class Poly {
+
+    /**
+     * Private constructor; class is not meant to be instantiated
+     */
+    private Poly() {
+
+    }
 
     /**
      * Reads the file, input.txt in the current directory, reads in the
@@ -23,7 +30,8 @@ public class Poly {
      * polynomials in the file to the output.txt
      *
      * @param args the command line arguments
-     * @throws java.io.IOException
+     * @throws java.io.IOException if either input.txt or output.txt cannot be
+     * respectively read or written to
      */
     public static void main(String[] args) throws IOException {
         final Path input = Paths.get("input.txt");
