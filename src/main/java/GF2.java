@@ -67,8 +67,8 @@ public class GF2 {
     }
 
     public static void main(String... args) throws IOException {
+        final Path input = Paths.get("input.txt");
         final Path output = Paths.get("output.txt");
-        final Path input = Paths.get("output.txt");
 
         final List<String> inputs = Files.readAllLines(input);
         final List<Gf2Polynomial> polies = generateFrom(inputs);
