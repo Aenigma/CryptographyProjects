@@ -92,30 +92,75 @@ public class GF2 {
     }
 }
 
+/**
+ * Facade pattern to implement an object which acts as a suite of reducers
+ *
+ * @author Kevin Raoofi
+ */
 class Gf2PolynomialMPolyFacade {
 
+    /** mpoly; keeps track of this for mult and div */
     private final Gf2Polynomial mpoly;
 
+    /**
+     * Creates a Gf2PolynomialMPolyFacade with given p and mpoly
+     *
+     * @param p prime number
+     * @param mpoly m polynomial
+     */
     public Gf2PolynomialMPolyFacade(int p, int[] mpoly) {
-        this.mpoly = new Gf2Polynomial(mpoly, p);
+        this(new Gf2Polynomial(mpoly, p));
     }
 
+    /**
+     * Creates a Gf2PolynomialMPolyFacade with the given polynomial object
+     *
+     * @param mpoly m polynomial as a Gf2Polynomial object
+     */
     public Gf2PolynomialMPolyFacade(Gf2Polynomial mpoly) {
         this.mpoly = mpoly;
     }
 
+    /**
+     * Adds two polynomials
+     *
+     * @param o1 first poly
+     * @param o2 second poly
+     * @return sum poly
+     */
     public Gf2Polynomial add(Gf2Polynomial o1, Gf2Polynomial o2) {
         return o1.add(o2);
     }
 
+    /**
+     * subtracts two polynomials
+     *
+     * @param o1 first poly
+     * @param o2 second poly
+     * @return diff poly
+     */
     public Gf2Polynomial sub(Gf2Polynomial o1, Gf2Polynomial o2) {
         return o1.sub(o2);
     }
 
+    /**
+     * multiplies two polynomials
+     *
+     * @param o1 first poly
+     * @param o2 second poly
+     * @return product poly
+     */
     public Gf2Polynomial mult(Gf2Polynomial o1, Gf2Polynomial o2) {
         return o1.mult(o2, mpoly);
     }
 
+    /**
+     * divides two polynomials
+     *
+     * @param o1 first poly
+     * @param o2 second poly
+     * @return dividend poly
+     */
     public Gf2Polynomial div(Gf2Polynomial o1, Gf2Polynomial o2) {
         return o1.div(o2, mpoly);
     }
@@ -178,8 +223,15 @@ class Gf2Polynomial {
         return ((x % y) + y) % y;
     }
 
-    static int[] normalize(int[] x, int y) {
-        return compactArray(convertToZP(x, y));
+    /**
+     * Values in the array are converted to Z_p and compacted
+     *
+     * @param arr array to normalize
+     * @param p prime number
+     * @return normalized copy of arr
+     */
+    static int[] normalize(int[] arr, int p) {
+        return compactArray(convertToZP(arr, p));
     }
 
     /**
@@ -195,6 +247,13 @@ class Gf2Polynomial {
         return Arrays.copyOfRange(arr, minPos, arr.length);
     }
 
+    /**
+     * Maps integers to Z_p by applying mathematical mod to them
+     *
+     * @param arr array to map
+     * @param p prime number
+     * @return a copy of arr with all values modded
+     */
     static int[] convertToZP(int[] arr, int p) {
         return Arrays.stream(arr)
                 .map(i -> mod(i, p))
@@ -223,22 +282,39 @@ class Gf2Polynomial {
         this.p = p;
     }
 
-    public Gf2Polynomial(int coefficient, int power, int p) {
-        final int[] tmpco = new int[power + 1];
+    /**
+     * Creates a polynomial with a single coefficient at a specific degree.
+     *
+     * {@code new Gf2Polynomial(1,0,p).add(new Gf2Polynomial(1,1,p))} is the
+     * same as @{code new Gf2Polynomial(new int[]{1,1}, p)}
+     *
+     * @param coefficient a single coefficient
+     * @param degree the degree of the coefficient
+     * @param p Prime number
+     */
+    public Gf2Polynomial(int coefficient, int degree, int p) {
+        final int[] tmpco = new int[degree + 1];
         tmpco[0] = coefficient;
 
         this.coefficients = normalize(tmpco, p);
         this.p = p;
     }
 
+    /**
+     * EEAP (Extended Euclidean Algorithm for Polynomials) over Z_p
+     *
+     * @param b another polynomial over Z_p
+     *
+     * @return polynomials u(x) and v(x) satisfying
+     * {@code u(x)*a(x) + v(x)*b(x) = gcd(a(x),b(x))}
+     *
+     */
     public Gf2Polynomial[] EEAP(Gf2Polynomial b) {
         if (b.isZero()) {
             final int resC = gf1div(1, this.coefficients[0]);
 
-            // iffy about this
             Gf2Polynomial result = new Gf2Polynomial(resC, this.getDegree(), p);
 
-            //result = new Gf2Polynomial(resC, 0, mpoly, p);
             return new Gf2Polynomial[]{result, this.newZero()};
         }
 
@@ -300,6 +376,11 @@ class Gf2Polynomial {
         return new Gf2Polynomial[]{q, r};
     }
 
+    /**
+     * Creates a zero polynomial with the same p value as the current polynomial
+     *
+     * @return zero polynomial with the same p
+     */
     public Gf2Polynomial newZero() {
         return new Gf2Polynomial(new int[]{}, p);
     }
@@ -334,6 +415,14 @@ class Gf2Polynomial {
         return new Gf2Polynomial(resultsP, this.p);
     }
 
+    /**
+     * Naive multiplication is multiplication that does not produce a polynomial
+     * within GF(P^M). All the coefficients, however, will be in Z_P. This is
+     * used as an intermediary step for multiplication.
+     *
+     * @param o other polynomial to multiply
+     * @return naive multiplication product, C'
+     */
     private Gf2Polynomial naiveMult(Gf2Polynomial o) {
         final int resultSize = this.coefficients.length
                 + o.coefficients.length - 1;
@@ -383,9 +472,16 @@ class Gf2Polynomial {
         return this.add(o.negate());
     }
 
+    /**
+     * Division of polynomials over the m polynomial
+     *
+     * @param o other polynomial divisor
+     * @param mpoly the m polynomial
+     * @return the dividend polynomial
+     */
     public Gf2Polynomial div(Gf2Polynomial o, Gf2Polynomial mpoly) {
-        //final Gf2Polynomial[] eeap = EEAP(o);
-        Gf2Polynomial[] eeap = new Gf2Polynomial(mpoly.coefficients, p).EEAP(o);
+        final Gf2Polynomial[] eeap = new Gf2Polynomial(mpoly.coefficients, p)
+                .EEAP(o);
 
         return this.mult(eeap[1], mpoly);
     }
@@ -406,8 +502,10 @@ class Gf2Polynomial {
     }
 
     /**
+     * Highest degree in the coefficient. If the polynomial is a zero
+     * polynomial, returns -1 as the degree.
      *
-     * @return highest power
+     * @return highest degree
      */
     public int getDegree() {
         if (this.isZero()) {
@@ -417,6 +515,11 @@ class Gf2Polynomial {
         return this.coefficients.length - 1;
     }
 
+    /**
+     * Determines if the polynomial is a zero polynomial
+     *
+     * @return true is zero polynomial, false otherwise
+     */
     public boolean isZero() {
         return this.coefficients.length == 0;
     }
