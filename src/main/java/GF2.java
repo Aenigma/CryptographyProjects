@@ -311,7 +311,7 @@ class Gf2Polynomial {
      */
     public Gf2Polynomial[] EEAP(Gf2Polynomial b) {
         if (b.isZero()) {
-            final int resC = gf1div(1, this.coefficients[0]);
+            final int resC = gf1div(1, this.getHighestCoefficient());
 
             Gf2Polynomial result = new Gf2Polynomial(resC, this.getDegree(), p);
 
@@ -364,7 +364,8 @@ class Gf2Polynomial {
 
             //System.out.println("r: " + r + " d: " + d);
             final int tCoefficient
-                    = gf1div(r.coefficients[0], d.coefficients[0]);
+                    = gf1div(r.getHighestCoefficient(),
+                            d.getHighestCoefficient());
 
             final Gf2Polynomial t = new Gf2Polynomial(tCoefficient,
                     r.getDegree() - d.getDegree(), p);
@@ -498,7 +499,8 @@ class Gf2Polynomial {
             return this;
         }
 
-        return new Gf2Polynomial(this.coefficients[0], this.getDegree(), p);
+        return new Gf2Polynomial(this.getHighestCoefficient(),
+                this.getDegree(), p);
     }
 
     /**
@@ -513,6 +515,19 @@ class Gf2Polynomial {
         }
 
         return this.coefficients.length - 1;
+    }
+
+    /**
+     * Gets the coefficient with the highest degree
+     *
+     * @return coefficient with highest degree; if zero polynomial, returns 0
+     */
+    public int getHighestCoefficient() {
+        if (this.isZero()) {
+            return 0;
+        }
+
+        return this.coefficients[0];
     }
 
     /**
