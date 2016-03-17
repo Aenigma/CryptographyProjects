@@ -71,18 +71,24 @@ public class GF2 {
 
         System.out.println(polies);
 
+        System.out.println("ADD: ");
+
         System.out.println(polies.stream()
                 .reduce(Gf2Polynomial::add)
                 .get());
+
+        System.out.println("SUB: ");
 
         System.out.println(polies.stream()
                 .reduce(Gf2Polynomial::sub)
                 .get());
 
+        System.out.println("MULT: ");
         System.out.println(polies.stream()
                 .reduce(Gf2Polynomial::mult)
                 .get());
 
+        System.out.println("DIV: ");
         System.out.println(polies.stream()
                 .reduce(Gf2Polynomial::div)
                 .get());
@@ -117,75 +123,6 @@ class Gf2Polynomial {
             int[] R = EEA(b, r);
             return new int[]{R[1], R[0] - q * R[1]};
         }
-    }
-
-    public Gf2Polynomial[] EEAP(Gf2Polynomial b) {
-        if (b.isZero()) {
-            final int resC = gf1div(1, this.coefficients[0]);
-
-            // iffy about this
-            Gf2Polynomial result = new Gf2Polynomial(resC, this
-                    .getDegree(),
-                    mpoly, p);
-
-            //result = new Gf2Polynomial(resC, 0, mpoly, p);
-            return new Gf2Polynomial[]{result, this.newZero()};
-        }
-
-        // i'm just copying the pseudocode; forgive me
-        final Gf2Polynomial[] Q = this.plda(b);
-
-        final Gf2Polynomial q = Q[0];
-        final Gf2Polynomial r = Q[1];
-
-        final Gf2Polynomial[] R = b.EEAP(r);
-
-        final Gf2Polynomial u = R[1];
-
-        final Gf2Polynomial v = R[0].sub(q.mult(R[1]));
-
-        return new Gf2Polynomial[]{u, v};
-    }
-
-    /**
-     * Divides the numbers by multiplying with the reverse modulo
-     *
-     * @param x operand1
-     * @param y operand1
-     * @return div in Z_p
-     */
-    private int gf1div(int x, int y) {
-        final int[] eea = EEA(y, this.p);
-
-        return mod((x * eea[0]), this.p);
-    }
-
-    /**
-     * PLDA (Polynomial Long Division Algorithm) over Z_p
-     *
-     * @param d a non-zero polynomial over Z_p
-     *
-     * @return quotient q(x) and remainder r(x) such that n(x) = q(x)*d(x) +
-     * r(x) where deg(r(x)) < deg(d(x))
-     */
-    private Gf2Polynomial[] plda(Gf2Polynomial d) {
-        // Zero polynomial
-        Gf2Polynomial q = this.newZero();
-        Gf2Polynomial r = this;
-
-        // this algorithm looks at internal structure...
-        while (!r.isZero() && r.getDegree() >= d.getDegree()) {
-            final int tCoefficient
-                    = gf1div(r.coefficients[0], d.coefficients[0]);
-
-            final Gf2Polynomial t = new Gf2Polynomial(tCoefficient,
-                    r.getDegree() - d.getDegree(), mpoly, p);
-
-            q = q.add(t);
-            r = r.sub(t.mult(d));
-        }
-
-        return new Gf2Polynomial[]{q, r};
     }
 
     /**
@@ -272,6 +209,77 @@ class Gf2Polynomial {
         this.p = p;
     }
 
+    public Gf2Polynomial[] EEAP(Gf2Polynomial b) {
+        if (b.isZero()) {
+            final int resC = gf1div(1, this.coefficients[0]);
+
+            // iffy about this
+            Gf2Polynomial result = new Gf2Polynomial(resC, this
+                    .getDegree(),
+                    mpoly, p);
+
+            //result = new Gf2Polynomial(resC, 0, mpoly, p);
+            return new Gf2Polynomial[]{result, this.newZero()};
+        }
+
+        // i'm just copying the pseudocode; forgive me
+        final Gf2Polynomial[] Q = this.plda(b);
+
+        final Gf2Polynomial q = Q[0];
+        final Gf2Polynomial r = Q[1];
+
+        final Gf2Polynomial[] R = b.EEAP(r);
+
+        final Gf2Polynomial u = R[1];
+
+        final Gf2Polynomial v = R[0].sub(q.naiveMult(R[1]));
+
+        return new Gf2Polynomial[]{u, v};
+    }
+
+    /**
+     * Divides the numbers by multiplying with the reverse modulo
+     *
+     * @param x operand1
+     * @param y operand1
+     * @return div in Z_p
+     */
+    private int gf1div(int x, int y) {
+        final int[] eea = EEA(y, this.p);
+
+        return mod((x * eea[0]), this.p);
+    }
+
+    /**
+     * PLDA (Polynomial Long Division Algorithm) over Z_p
+     *
+     * @param d a non-zero polynomial over Z_p
+     *
+     * @return quotient q(x) and remainder r(x) such that n(x) = q(x)*d(x) +
+     * r(x) where deg(r(x)) < deg(d(x))
+     */
+    private Gf2Polynomial[] plda(Gf2Polynomial d) {
+        // Zero polynomial
+        Gf2Polynomial q = this.newZero();
+        Gf2Polynomial r = this;
+
+        // this algorithm looks at internal structure...
+        while (!r.isZero() && r.getDegree() >= d.getDegree()) {
+
+            //System.out.println("r: " + r + " d: " + d);
+            final int tCoefficient
+                    = gf1div(r.coefficients[0], d.coefficients[0]);
+
+            final Gf2Polynomial t = new Gf2Polynomial(tCoefficient,
+                    r.getDegree() - d.getDegree(), mpoly, p);
+
+            q = q.add(t);
+            r = r.sub(t.naiveMult(d));
+        }
+
+        return new Gf2Polynomial[]{q, r};
+    }
+
     public Gf2Polynomial newZero() {
         return new Gf2Polynomial(new int[]{}, mpoly, p);
     }
@@ -342,13 +350,6 @@ class Gf2Polynomial {
         // intermediary form; possibly not in field
         final Gf2Polynomial cPrime = this.naiveMult(o);
 
-        /* check if cPrime is in field; if so, just use that, otherwise, use
-         * PLDA to get it back down */
-        if (cPrime.getDegree() <= mpoly.length - 1) {
-            return cPrime;
-        }
-
-        // TODO: what should mpoly be here?
         return cPrime.plda(new Gf2Polynomial(mpoly, mpoly, p))[1];
     }
 
@@ -367,7 +368,6 @@ class Gf2Polynomial {
         final Gf2Polynomial[] eeap = EEAP(o);
 
         //System.out.println(Arrays.toString(eeap));
-
         return eeap[1];
     }
 
