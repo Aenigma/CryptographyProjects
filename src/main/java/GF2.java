@@ -365,10 +365,10 @@ class Gf2Polynomial {
     }
 
     public Gf2Polynomial div(Gf2Polynomial o) {
-        final Gf2Polynomial[] eeap = EEAP(o);
+        //final Gf2Polynomial[] eeap = EEAP(o);
+        Gf2Polynomial[] eeap = new Gf2Polynomial(mpoly, mpoly, p).EEAP(o);
 
-        //System.out.println(Arrays.toString(eeap));
-        return eeap[1];
+        return this.mult(eeap[1]);
     }
 
     /**
