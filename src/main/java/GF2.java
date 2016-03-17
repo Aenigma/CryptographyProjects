@@ -47,7 +47,7 @@ public class GF2 {
 
         final List<String> polyList = inputs.subList(3, inputs.size());
 
-        // 1. get ever odd line to get every coefficients list
+        // 1. get every odd line to get every coefficients list
         // 2. coefficients are split on whitespace
         // 3. all strings in the split is parsed as an integer
         // 4. construct a polynomial using that array of ints
@@ -60,39 +60,78 @@ public class GF2 {
                         .mapToInt(Integer::parseInt)
                         .toArray()
                 )
-                .map(ia -> new Gf2Polynomial(ia, m, p))
+                .map(ia -> new Gf2Polynomial(ia, p))
                 .collect(Collectors.toList());
     }
 
     public static void main(String... args) throws IOException {
-        List<Gf2Polynomial> polies
-                = generateFrom(Files.readAllLines(Paths.get(
-                                        "input.txt")));
+        final List<String> inputs = Files.readAllLines(Paths.get(
+                "input.txt"));
+        final List<Gf2Polynomial> polies
+                = generateFrom(inputs);
+        final int p = Integer.parseInt(inputs.get(0));
+        int[] mpoly = generateArrFrom(inputs.get(2));
+
+        final Gf2PolynomialMPolyFacade facade
+                = new Gf2PolynomialMPolyFacade(p, mpoly);
 
         System.out.println(polies);
 
         System.out.println("ADD: ");
 
         System.out.println(polies.stream()
-                .reduce(Gf2Polynomial::add)
+                .reduce(facade::add)
                 .get());
 
         System.out.println("SUB: ");
 
         System.out.println(polies.stream()
-                .reduce(Gf2Polynomial::sub)
+                .reduce(facade::sub)
                 .get());
 
         System.out.println("MULT: ");
         System.out.println(polies.stream()
-                .reduce(Gf2Polynomial::mult)
+                .reduce(facade::mult)
                 .get());
 
         System.out.println("DIV: ");
         System.out.println(polies.stream()
-                .reduce(Gf2Polynomial::div)
+                .reduce(facade::div)
                 .get());
     }
+}
+
+class Gf2PolynomialMPolyFacade {
+
+    private final int p;
+    private final Gf2Polynomial mpoly;
+
+    public Gf2PolynomialMPolyFacade(int p, int[] mpoly) {
+        this.p = p;
+        this.mpoly = new Gf2Polynomial(mpoly, p);
+    }
+
+    public Gf2PolynomialMPolyFacade(int p, Gf2Polynomial mpoly) {
+        this.p = p;
+        this.mpoly = mpoly;
+    }
+
+    public Gf2Polynomial add(Gf2Polynomial o1, Gf2Polynomial o2) {
+        return o1.add(o2);
+    }
+
+    public Gf2Polynomial sub(Gf2Polynomial o1, Gf2Polynomial o2) {
+        return o1.sub(o2);
+    }
+
+    public Gf2Polynomial mult(Gf2Polynomial o1, Gf2Polynomial o2) {
+        return o1.mult(o2, mpoly);
+    }
+
+    public Gf2Polynomial div(Gf2Polynomial o1, Gf2Polynomial o2) {
+        return o1.div(o2, mpoly);
+    }
+
 }
 
 /**
@@ -114,7 +153,7 @@ class Gf2Polynomial {
      *
      * @return int array (u,v) satisfying u*a + v*b = gcd(a,b)
      */
-    public static int[] EEA(int a, int b) {
+    static int[] EEA(int a, int b) {
         if (b == 0) {
             return new int[]{1, 0};
         } else {
@@ -147,11 +186,11 @@ class Gf2Polynomial {
      * @param y the divisor
      * @return the modulo result of x and y
      */
-    private static int mod(int x, int y) {
+    static int mod(int x, int y) {
         return ((x % y) + y) % y;
     }
 
-    private static int[] normalize(int[] x, int y) {
+    static int[] normalize(int[] x, int y) {
         return compactArray(convertToZP(x, y));
     }
 
@@ -177,9 +216,6 @@ class Gf2Polynomial {
     /** Coefficients in polynomial */
     private final int[] coefficients;
 
-    /** m(x), the irreducible polynomial over Z_p */
-    private final int[] mpoly;
-
     /** Prime number, p */
     private final int p;
 
@@ -193,19 +229,17 @@ class Gf2Polynomial {
      * @param mpoly the irreducible polynomial over Z_p
      * @param p Prime number
      */
-    public Gf2Polynomial(int[] coefficients, int[] mpoly, int p) {
+    public Gf2Polynomial(int[] coefficients, int p) {
 
         this.coefficients = normalize(coefficients, p);
-        this.mpoly = mpoly;
         this.p = p;
     }
 
-    public Gf2Polynomial(int coefficient, int power, int[] mpoly, int p) {
+    public Gf2Polynomial(int coefficient, int power, int p) {
         final int[] tmpco = new int[power + 1];
         tmpco[0] = coefficient;
 
         this.coefficients = normalize(tmpco, p);
-        this.mpoly = mpoly;
         this.p = p;
     }
 
@@ -214,9 +248,7 @@ class Gf2Polynomial {
             final int resC = gf1div(1, this.coefficients[0]);
 
             // iffy about this
-            Gf2Polynomial result = new Gf2Polynomial(resC, this
-                    .getDegree(),
-                    mpoly, p);
+            Gf2Polynomial result = new Gf2Polynomial(resC, this.getDegree(), p);
 
             //result = new Gf2Polynomial(resC, 0, mpoly, p);
             return new Gf2Polynomial[]{result, this.newZero()};
@@ -271,7 +303,7 @@ class Gf2Polynomial {
                     = gf1div(r.coefficients[0], d.coefficients[0]);
 
             final Gf2Polynomial t = new Gf2Polynomial(tCoefficient,
-                    r.getDegree() - d.getDegree(), mpoly, p);
+                    r.getDegree() - d.getDegree(), p);
 
             q = q.add(t);
             r = r.sub(t.naiveMult(d));
@@ -281,7 +313,7 @@ class Gf2Polynomial {
     }
 
     public Gf2Polynomial newZero() {
-        return new Gf2Polynomial(new int[]{}, mpoly, p);
+        return new Gf2Polynomial(new int[]{}, p);
     }
 
     /**
@@ -311,7 +343,7 @@ class Gf2Polynomial {
 
         final int[] resultsP = convertToZP(results, this.p);
 
-        return new Gf2Polynomial(resultsP, this.mpoly, this.p);
+        return new Gf2Polynomial(resultsP, this.p);
     }
 
     private Gf2Polynomial naiveMult(Gf2Polynomial o) {
@@ -336,8 +368,7 @@ class Gf2Polynomial {
         }
         final int[] resultsP = convertToZP(results, this.p);
 
-        return new Gf2Polynomial(resultsP, this.mpoly,
-                this.p);
+        return new Gf2Polynomial(resultsP, this.p);
     }
 
     /**
@@ -346,11 +377,11 @@ class Gf2Polynomial {
      * @param o the polynomial to multiply
      * @return a new polynomial with the product
      */
-    public Gf2Polynomial mult(Gf2Polynomial o) {
+    public Gf2Polynomial mult(Gf2Polynomial o, Gf2Polynomial mpoly) {
         // intermediary form; possibly not in field
         final Gf2Polynomial cPrime = this.naiveMult(o);
 
-        return cPrime.plda(new Gf2Polynomial(mpoly, mpoly, p))[1];
+        return cPrime.plda(new Gf2Polynomial(mpoly.coefficients, p))[1];
     }
 
     /**
@@ -364,11 +395,11 @@ class Gf2Polynomial {
         return this.add(o.negate());
     }
 
-    public Gf2Polynomial div(Gf2Polynomial o) {
+    public Gf2Polynomial div(Gf2Polynomial o, Gf2Polynomial mpoly) {
         //final Gf2Polynomial[] eeap = EEAP(o);
-        Gf2Polynomial[] eeap = new Gf2Polynomial(mpoly, mpoly, p).EEAP(o);
+        Gf2Polynomial[] eeap = new Gf2Polynomial(mpoly.coefficients, p).EEAP(o);
 
-        return this.mult(eeap[1]);
+        return this.mult(eeap[1], mpoly);
     }
 
     /**
@@ -383,8 +414,7 @@ class Gf2Polynomial {
             return this;
         }
 
-        return new Gf2Polynomial(this.coefficients[0], this.getDegree(),
-                mpoly, p);
+        return new Gf2Polynomial(this.coefficients[0], this.getDegree(), p);
     }
 
     /**
@@ -418,22 +448,21 @@ class Gf2Polynomial {
 
         final int[] copyP = convertToZP(copy, p);
 
-        return new Gf2Polynomial(copyP, this.mpoly, this.p);
+        return new Gf2Polynomial(copyP, this.p);
     }
 
     @Override
     public String toString() {
-        return "Gf2Polynomial{" + "coefficients="
-                + Arrays.toString(coefficients) + ", mpoly="
-                + Arrays.toString(mpoly) + ", p=" + p + '}';
+        return "Gf2Polynomial{" + "coefficients=" + Arrays
+                .toString(coefficients) + ", p=" + p
+                + '}';
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 29 * hash + Arrays.hashCode(this.coefficients);
-        hash = 29 * hash + Arrays.hashCode(this.mpoly);
-        hash = 29 * hash + this.p;
+        int hash = 7;
+        hash = 67 * hash + Arrays.hashCode(this.coefficients);
+        hash = 67 * hash + this.p;
         return hash;
     }
 
@@ -447,9 +476,6 @@ class Gf2Polynomial {
         }
         final Gf2Polynomial other = (Gf2Polynomial) obj;
         if (!Arrays.equals(this.coefficients, other.coefficients)) {
-            return false;
-        }
-        if (!Arrays.equals(this.mpoly, other.mpoly)) {
             return false;
         }
         if (this.p != other.p) {
