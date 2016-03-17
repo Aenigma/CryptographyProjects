@@ -1,9 +1,12 @@
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -43,7 +46,6 @@ public class GF2 {
      */
     static List<Gf2Polynomial> generateFrom(final List<String> inputs) {
         final int p = Integer.parseInt(inputs.get(0));
-        final int[] m = generateArrFrom(inputs.get(2));
 
         final List<String> polyList = inputs.subList(3, inputs.size());
 
@@ -65,54 +67,40 @@ public class GF2 {
     }
 
     public static void main(String... args) throws IOException {
-        final List<String> inputs = Files.readAllLines(Paths.get(
-                "input.txt"));
-        final List<Gf2Polynomial> polies
-                = generateFrom(inputs);
+        final Path output = Paths.get("output.txt");
+        final Path input = Paths.get("output.txt");
+
+        final List<String> inputs = Files.readAllLines(input);
+        final List<Gf2Polynomial> polies = generateFrom(inputs);
+
         final int p = Integer.parseInt(inputs.get(0));
-        int[] mpoly = generateArrFrom(inputs.get(2));
+        final int[] mpoly = generateArrFrom(inputs.get(2));
 
         final Gf2PolynomialMPolyFacade facade
                 = new Gf2PolynomialMPolyFacade(p, mpoly);
 
-        System.out.println(polies);
-
-        System.out.println("ADD: ");
-
-        System.out.println(polies.stream()
-                .reduce(facade::add)
-                .get());
-
-        System.out.println("SUB: ");
-
-        System.out.println(polies.stream()
-                .reduce(facade::sub)
-                .get());
-
-        System.out.println("MULT: ");
-        System.out.println(polies.stream()
-                .reduce(facade::mult)
-                .get());
-
-        System.out.println("DIV: ");
-        System.out.println(polies.stream()
-                .reduce(facade::div)
-                .get());
+        Files.write(output, Arrays.<BinaryOperator<Gf2Polynomial>>asList(
+                facade::add, facade::sub, facade::mult, facade::div)
+                .stream()
+                .map(reducer -> polies.stream()
+                        .reduce(reducer)
+                        .map(Gf2Polynomial::outputFormat)
+                        .get()
+                )
+                .collect(Collectors.toList())
+        );
     }
 }
 
 class Gf2PolynomialMPolyFacade {
 
-    private final int p;
     private final Gf2Polynomial mpoly;
 
     public Gf2PolynomialMPolyFacade(int p, int[] mpoly) {
-        this.p = p;
         this.mpoly = new Gf2Polynomial(mpoly, p);
     }
 
-    public Gf2PolynomialMPolyFacade(int p, Gf2Polynomial mpoly) {
-        this.p = p;
+    public Gf2PolynomialMPolyFacade(Gf2Polynomial mpoly) {
         this.mpoly = mpoly;
     }
 
@@ -449,6 +437,22 @@ class Gf2Polynomial {
         final int[] copyP = convertToZP(copy, p);
 
         return new Gf2Polynomial(copyP, this.p);
+    }
+
+    /**
+     * String representation with coefficients separated via spaces. This is the
+     * format specified for the output file per polynomial
+     *
+     * @return string with coefficients separated via spaces
+     */
+    public String outputFormat() {
+        final StringJoiner sj = new StringJoiner(" ");
+
+        for (int i : this.coefficients) {
+            sj.add(Integer.toString(i));
+        }
+
+        return sj.toString();
     }
 
     @Override
