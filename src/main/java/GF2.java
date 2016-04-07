@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
  * the License.
  */
 /**
- *
+ * 
  * @author Kevin Raoofi
  */
 public class GF2 {
