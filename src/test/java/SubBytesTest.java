@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import java.util.Arrays;
+import java.util.Random;
+import org.junit.Ignore;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -76,23 +80,20 @@ public class SubBytesTest {
         0x55, 0x21, 0x0C, 0x7D
     };
 
+    final Random r;
+
     public SubBytesTest() {
+        this.r = new Random();
     }
 
     /**
      * Test of binMatMult method, of class SubBytes.
      */
     @Test
+    @Ignore
     public void testBinMatMult() {
         System.out.println("binMatMult");
-        int[][] matA = null;
-        int[][] matB = null;
-        SubBytes instance = null;
-        int[][] expResult = null;
-        int[][] result = instance.binMatMult(matA, matB);
-        assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
     }
 
     /**
@@ -119,16 +120,34 @@ public class SubBytesTest {
         assertArrayEquals(expResult, result);
     }
 
+    @Test
+    public void testTransformReverseSymmetric() {
+        System.out.println("testTransformReverseSymmetric");
+        final byte[] input = new byte[256];
+        this.r.nextBytes(input);
+        final byte[] expResults = Arrays.copyOf(input, input.length);
+
+        SubBytes instance = new SubBytes(RIJINDAEL_DEFAULT_MX_POLY);
+
+        instance.transform(input);
+        instance.reverse(input);
+
+        assertArrayEquals(expResults, input);
+    }
+
     /**
      * Test of transform method, of class SubBytes.
      */
     @Test
     public void testTransform() {
         System.out.println("transform");
-        SubBytes instance = null;
-        instance.transform();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        SubBytes instance = new SubBytes(RIJINDAEL_DEFAULT_MX_POLY);
+        byte[] input = new byte[]{0, 1, 2, 3};
+        instance.transform(input);
+        byte[] expResult = new byte[]{0x63, 0x7C, 0x77, 0x7B};
+
+        assertArrayEquals(expResult, input);
+
     }
 
     /**
@@ -137,22 +156,15 @@ public class SubBytesTest {
     @Test
     public void testReverse() {
         System.out.println("reverse");
-        SubBytes instance = null;
-        instance.reverse();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+        SubBytes instance = new SubBytes(RIJINDAEL_DEFAULT_MX_POLY);
 
-    /**
-     * Test of main method, of class SubBytes.
-     */
-    @Test
-    public void testMain() {
-        System.out.println("main");
-        String[] args = null;
-        SubBytes.main(args);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        byte[] input = new byte[]{0, 1, 2, 3};
+
+        instance.reverse(input);
+
+        byte[] expResult = new byte[]{(byte) 0x52, 0x09, 0x6A, (byte) 0xD5};
+
+        assertArrayEquals(expResult, input);
     }
 
 }

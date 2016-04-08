@@ -120,12 +120,16 @@ public class SubBytes {
         return Arrays.copyOf(this.invSbox, this.invSbox.length);
     }
 
-    public void transform() {
-
+    public void transform(byte[] input) {
+        for (int i = 0; i < input.length; i++) {
+            input[i] = (byte) this.sbox[input[i] & 0xFF];
+        }
     }
 
-    public void reverse() {
-
+    public void reverse(byte[] input) {
+        for (int i = 0; i < input.length; i++) {
+            input[i] = (byte) this.invSbox[input[i] & 0xFF];
+        }
     }
 
     public static void main(String... args) {
