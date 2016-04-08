@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
  * the License.
  */
 /**
- * 
+ *
  * @author Kevin Raoofi
  */
 public class GF2 {
@@ -528,6 +528,14 @@ class Gf2Polynomial {
         }
 
         return this.coefficients[0];
+    }
+
+    public int[] getCoefficients() {
+        return Arrays.copyOf(this.coefficients, this.coefficients.length);
+    }
+
+    public int getMp() {
+        return p;
     }
 
     /**
