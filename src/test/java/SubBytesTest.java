@@ -16,7 +16,6 @@
 
 import java.util.Arrays;
 import java.util.Random;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -90,7 +89,6 @@ public class SubBytesTest {
      * Test of binMatMult method, of class SubBytes.
      */
     @Test
-    @Ignore
     public void testBinMatMult() {
         System.out.println("binMatMult");
 

@@ -24,27 +24,3 @@ public class Aes {
 
 }
 
-
-
-class ShiftRows {
-
-    public void transform() {
-
-    }
-
-    public void reverse() {
-
-    }
-}
-
-class MixColumns {
-
-    public void transform() {
-
-    }
-
-    public void reverse() {
-
-    }
-;
-}
