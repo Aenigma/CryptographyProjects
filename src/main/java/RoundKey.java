@@ -18,11 +18,6 @@
  *
  * @author Kevin Raoofi
  */
-public class Diffusion {
-
-    final ShiftRows shiftRows = new ShiftRows();
-
-    public void transform(byte[] state) {
-
-    }
+public class RoundKey {
+    
 }

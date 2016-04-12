@@ -94,4 +94,14 @@ public final class Utils {
         return arrayReversed(coef);
     }
 
+    public static void transpose(byte[][] mat) {
+        for (int i = 0; i < mat.length + 1; i++) {
+            for (int j = i; j < mat[0].length; j++) {
+                byte temp = mat[i][j];
+                mat[i][j] = mat[j][i];
+                mat[j][i] = temp;
+            }
+        }
+    }
+
 }

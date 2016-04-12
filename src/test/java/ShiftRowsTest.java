@@ -150,21 +150,24 @@ public class ShiftRowsTest {
         System.out.println("transform");
 
         byte[] state = new byte[]{
-            0, 1, 2, 3,
-            4, 5, 6, 7,
-            8, 9, 10, 11,
-            12, 13, 14, 15
+            0, 4, 8, 12,
+            1, 5, 9, 13,
+            2, 6, 10, 14,
+            3, 7, 11, 15
         };
 
         // Note this is a transposed version of the typical AES implementation
         byte[] expected = new byte[]{
-            0, 5, 10, 15,
-            4, 9, 14, 3,
-            8, 13, 2, 7,
-            12, 1, 6, 11
+            0, 4, 8, 12,
+            5, 9, 13, 1,
+            10, 14, 2, 6,
+            15, 3, 7, 11
         };
         ShiftRows instance = new ShiftRows();
         instance.transform(state);
+
+        System.out.println(Arrays.toString(expected));
+        System.out.println(Arrays.toString(state));
 
         assertArrayEquals(expected, state);
     }
@@ -178,21 +181,24 @@ public class ShiftRowsTest {
 
         // Note this is a transposed version of the typical AES implementation
         byte[] state = new byte[]{
-            0, 5, 10, 15,
-            4, 9, 14, 3,
-            8, 13, 2, 7,
-            12, 1, 6, 11
+            0, 4, 8, 12,
+            5, 9, 13, 1,
+            10, 14, 2, 6,
+            15, 3, 7, 11
         };
 
         byte[] expected = new byte[]{
-            0, 1, 2, 3,
-            4, 5, 6, 7,
-            8, 9, 10, 11,
-            12, 13, 14, 15
+            0, 4, 8, 12,
+            1, 5, 9, 13,
+            2, 6, 10, 14,
+            3, 7, 11, 15
         };
 
         ShiftRows instance = new ShiftRows();
         instance.reverse(state);
+
+        System.out.println(Arrays.toString(expected));
+        System.out.println(Arrays.toString(state));
 
         assertArrayEquals(expected, state);
     }

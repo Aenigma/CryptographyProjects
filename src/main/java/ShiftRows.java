@@ -80,7 +80,9 @@ public class ShiftRows {
 
     public void transform(byte[] state) {
         final byte[][] mat = stateToMat(state);
+        Utils.transpose(mat);
         shiftRows(mat);
+        Utils.transpose(mat);
         final byte[] nState = matToState(mat);
 
         System.arraycopy(nState, 0, state, 0, state.length);
@@ -88,7 +90,9 @@ public class ShiftRows {
 
     public void reverse(byte[] state) {
         final byte[][] mat = stateToMat(state);
+        Utils.transpose(mat);
         rightShiftRows(mat);
+        Utils.transpose(mat);
         final byte[] nState = matToState(mat);
 
         System.arraycopy(nState, 0, state, 0, state.length);

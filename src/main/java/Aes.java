@@ -22,5 +22,7 @@ import java.util.Arrays;
  */
 public class Aes {
 
-}
+    static final Gf2Polynomial RIJNDAEL_MX = new Gf2Polynomial(
+            new int[]{1, 0, 0, 0, 1, 1, 0, 1, 1}, 2);
 
+}
