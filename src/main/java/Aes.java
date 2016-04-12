@@ -1,6 +1,12 @@
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /*
  * Copyright 2016 Kevin Raoofi.
@@ -105,18 +111,52 @@ public class Aes {
         return state;
     }
 
-    public static void main(String... args) {
-        Aes aes = new Aes(RIJNDAEL_MX, NIST_SAMPLE_KEY);
-        byte[] plain
-                = new BigInteger("3243f6a8885a308d313198a2e0370734", 16)
-                .toByteArray();
+    static byte[] strToBa(String s) {
+        final byte[] res = new BigInteger(s, 16).toByteArray();
+        final byte[] copy = new byte[16];
 
-        byte[] encrypt = aes.encrypt(plain);
+        System.arraycopy(res, 0, copy, (copy.length - res.length), res.length);
+        return copy;
+    }
 
-        byte[] decrypt = aes.decrypt(encrypt);
+    static String ba2HexOutput(byte[] ba) {
+        final StringBuilder sb = new StringBuilder();
 
-        System.out.println(RoundKey.ba2Hex(encrypt));
-        System.out.println(RoundKey.ba2Hex(decrypt));
+        for (byte b : ba) {
+            sb.append(Integer.toHexString(b & 0xFF));
+        }
+
+        return sb.toString();
+    }
+
+    public static void main(String... args) throws IOException {
+        final Path input = Paths.get("input.txt");
+        final Path output = Paths.get("output.txt");
+        final List<String> lines = Files.readAllLines(input);
+
+        final int[] coefficients
+                = Arrays.stream(lines.get(0)
+                        .split(" "))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+
+        final Gf2Polynomial mx = new Gf2Polynomial(coefficients, 2);
+
+        final byte[] key = strToBa(lines.get(1));
+        final byte[] plaintext = strToBa(lines.get(2));
+        final byte[] ciphertext = strToBa(lines.get(3));
+
+        final Aes aes = new Aes(mx, key);
+
+        final byte[] encrypt = aes.encrypt(plaintext);
+        final byte[] decrypt = aes.decrypt(ciphertext);
+
+        final List<String> outList = new ArrayList<>(2);
+
+        outList.add(ba2HexOutput(encrypt));
+        outList.add(ba2HexOutput(decrypt));
+
+        Files.write(output, outList);
     }
 
 }
