@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import org.junit.Test;
@@ -26,6 +27,10 @@ import static org.junit.Assert.*;
  */
 public class AesRoundTest {
 
+    private static final byte[] NIST_SAMPLE_KEY = new BigInteger(
+            "2b7e151628aed2a6abf7158809cf4f3c", 16)
+            .toByteArray();
+
     private final SubBytes subBytes;
     private final ShiftRows shiftRows;
     private final MixColumns mixColumns;
@@ -35,7 +40,7 @@ public class AesRoundTest {
         this.subBytes = new SubBytes(Aes.RIJNDAEL_MX);
         this.shiftRows = new ShiftRows();
         this.mixColumns = new MixColumns(Aes.RIJNDAEL_MX);
-        this.roundKey = new RoundKey();
+        this.roundKey = new RoundKey(NIST_SAMPLE_KEY, subBytes, Aes.RIJNDAEL_MX);
     }
 
     static void displayState(byte[] state) {
@@ -135,4 +140,21 @@ public class AesRoundTest {
 
         assertArrayEquals(before2, before);
     }
+
+    @Test
+    public void roundKeyGeneration() {
+        System.out.println("roundKeyGeneration");
+
+        final byte[] expected = new byte[]{
+            (byte) 0xef, (byte) 0xa8, (byte) 0xb6, (byte) 0xdb,
+            (byte) 0x44, (byte) 0x52, (byte) 0x71, (byte) 0x0b,
+            (byte) 0xa5, (byte) 0x5b, (byte) 0x25, (byte) 0xad,
+            (byte) 0x41, (byte) 0x7f, (byte) 0x3b, (byte) 0x00,};
+
+        byte[] actual = roundKey.getRoundKey(4);
+
+        assertArrayEquals(expected, actual);
+
+    }
+
 }

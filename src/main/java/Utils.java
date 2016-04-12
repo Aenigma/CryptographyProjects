@@ -104,4 +104,25 @@ public final class Utils {
         }
     }
 
+    public static void transpose(int start, int end, byte[][] mat) {
+        for (int i = start; i < end; i++) {
+            for (int j = 0; j < 4; j++) {
+                byte temp = mat[i][j];
+                mat[i][j] = mat[j + start][i - start];
+                mat[j + start][i - start] = temp;
+            }
+        }
+    }
+
+    public static byte[][] stateToMat(byte[] state) {
+        final byte[][] words = new byte[4][];
+
+        final int f = state.length / 4;
+
+        for (int i = 0; i < words.length; i++) {
+            words[i] = Arrays.copyOfRange(state, f * i, f * (i + 1));
+        }
+
+        return words;
+    }
 }

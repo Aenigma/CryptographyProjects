@@ -105,18 +105,6 @@ public class MixColumns {
         return ans;
     }
 
-    static byte[][] stateToMat(byte[] state) {
-        final byte[][] words = new byte[4][];
-
-        final int f = state.length / 4;
-
-        for (int i = 0; i < words.length; i++) {
-            words[i] = Arrays.copyOfRange(state, f * i, f * (i + 1));
-        }
-
-        return words;
-    }
-
     static void serialize(byte[][] words, byte[] ba) {
         for (int i = 0; i < words.length; i++) {
             System.arraycopy(words[i], 0, ba, i * 4, 4);
@@ -124,7 +112,7 @@ public class MixColumns {
     }
 
     public void transform(byte[] state) {
-        final byte[][] words = stateToMat(state);
+        final byte[][] words = Utils.stateToMat(state);
 
         Utils.transpose(words);
 
@@ -134,7 +122,7 @@ public class MixColumns {
     }
 
     public void reverse(byte[] state) {
-        final byte[][] words = stateToMat(state);
+        final byte[][] words = Utils.stateToMat(state);
 
         Utils.transpose(words);
 
