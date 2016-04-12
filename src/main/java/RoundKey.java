@@ -119,6 +119,10 @@ public class RoundKey {
 
     }
 
+    public void addRoundKey(byte[] state, int round) {
+        xorArr(state, getRoundKey(round));
+    }
+
     public byte[] getRoundKey(int round) {
         byte[][] roundKeyMat = this.keys[round];
         byte[] keySerialized = new byte[16];

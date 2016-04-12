@@ -125,4 +125,27 @@ public final class Utils {
 
         return words;
     }
+
+    public static void serialize(byte[][] words, byte[] ba) {
+        for (int i = 0; i < words.length; i++) {
+            System.arraycopy(words[i], 0, ba, i * 4, 4);
+        }
+    }
+
+    /**
+     * modifies arr1 with arr2 xor
+     *
+     * @param arr1
+     * @param arr2
+     */
+    public static void xorArr(byte[] arr1, byte[] arr2) {
+
+        if (arr1.length != arr2.length) {
+            throw new IllegalArgumentException("arr length must be equal");
+        }
+
+        for (int i = 0; i < arr1.length; i++) {
+            arr1[i] ^= arr2[i];
+        }
+    }
 }
