@@ -112,10 +112,16 @@ public class Aes {
     }
 
     static byte[] strToBa(String s) {
-        final byte[] res = new BigInteger(s, 16).toByteArray();
+        if (s.length() != 32) {
+            throw new IllegalArgumentException(
+                    "Size of String must be exactly 32");
+        }
         final byte[] copy = new byte[16];
 
-        System.arraycopy(res, 0, copy, (copy.length - res.length), res.length);
+        for (int i = 0; i < 16; i++) {
+            copy[i] = (byte) Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16);
+        }
+
         return copy;
     }
 
