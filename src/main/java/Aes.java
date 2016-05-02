@@ -129,7 +129,7 @@ public class Aes {
         final StringBuilder sb = new StringBuilder();
 
         for (byte b : ba) {
-            sb.append(Integer.toHexString(b & 0xFF));
+            sb.append(String.format("%02X", b & 0xFF));
         }
 
         return sb.toString();
