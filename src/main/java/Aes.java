@@ -63,13 +63,13 @@ public class Aes {
             subBytes.transform(state);
             shiftRows.transform(state);
             mixColumns.transform(state);
-            roundKey.addRoundKey(state, i);
+            // roundKey.addRoundKey(state, i);
 
         }
 
         subBytes.transform(state);
         shiftRows.transform(state);
-        roundKey.addRoundKey(state, 10);
+        // roundKey.addRoundKey(state, 10);
 
         {
             final byte[][] mat = Utils.stateToMat(state);
@@ -78,6 +78,44 @@ public class Aes {
         }
 
         return state;
+    }
+
+    public byte[] crack(byte[] cipher, byte[] plaintext) {
+        final byte[] state = new byte[cipher.length];
+
+        final byte[] plaintextCopy = new byte[plaintext.length];
+
+        {
+            final byte[][] mat = Utils.stateToMat(cipher);
+            Utils.transpose(mat);
+            Utils.serialize(mat, state);
+            final byte[][] plaintextState = Utils.stateToMat(plaintext);
+            Utils.transpose(plaintextState);
+            Utils.serialize(plaintextState, plaintextCopy);
+        }
+
+        for (int i = 9; i > 0; i--) {
+            shiftRows.reverse(state);
+            subBytes.reverse(state);
+            mixColumns.reverse(state);
+
+        }
+        shiftRows.reverse(state);
+        subBytes.reverse(state);
+
+        System.out.println(ba2HexOutput(state));
+
+        RoundKey.xorArr(state, plaintextCopy);
+        //roundKey.addRoundKey(state, 0);
+
+        {
+            final byte[][] mat = Utils.stateToMat(state);
+            Utils.transpose(mat);
+            Utils.serialize(mat, state);
+        }
+
+        return state;
+
     }
 
     public byte[] decrypt(byte[] cipher) {
@@ -150,12 +188,12 @@ public class Aes {
 
         final byte[] key = strToBa(lines.get(1));
         final byte[] plaintext = strToBa(lines.get(2));
-        final byte[] ciphertext = strToBa(lines.get(3));
+        //final byte[] ciphertext = strToBa(lines.get(3));
 
         final Aes aes = new Aes(mx, key);
 
         final byte[] encrypt = aes.encrypt(plaintext);
-        final byte[] decrypt = aes.decrypt(ciphertext);
+        final byte[] decrypt = aes.crack(encrypt, plaintext);
 
         final List<String> outList = new ArrayList<>(2);
 
